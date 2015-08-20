@@ -70,6 +70,20 @@ describe JIRA::Resource::Issue do
     expect(JIRA::Resource::Issue.jql(client, 'foo bar', fields: ['foo','bar'])).to eq([''])
   end
 
+  it "should search an issue with a jql query string and expand" do
+    response = double()
+    issue = double()
+
+    allow(response).to receive(:body).and_return('{"issues": {"key":"foo"}}')
+    expect(client).to receive(:get)
+      .with('/jira/rest/api/2/search?jql=foo+bar&expand=changelog')
+      .and_return(response)
+    expect(client).to receive(:Issue).and_return(issue)
+    expect(issue).to receive(:build).with(["key", "foo"]).and_return('')
+
+    expect(JIRA::Resource::Issue.jql(client, 'foo bar', expand: ['changelog'])).to eq([''])
+  end
+
   it "should search an issue with a jql query string, start at, and maxResults" do
     response = double()
     issue = double()

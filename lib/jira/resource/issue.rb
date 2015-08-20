@@ -44,10 +44,11 @@ module JIRA
         end
       end
 
-      def self.jql(client, jql, options = {fields: nil, start_at: nil, max_results: nil})
+      def self.jql(client, jql, options = {fields: nil, start_at: nil, max_results: nil, expand: nil})
         url = client.options[:rest_base_path] + "/search?jql=" + CGI.escape(jql)
 
         url << "&fields=#{options[:fields].map{ |value| CGI.escape(value.to_s) }.join(',')}" if options[:fields]
+        url << "&expand=#{options[:expand].map{ |value| CGI.escape(value.to_s) }.join(',')}" if options[:expand]
         url << "&startAt=#{CGI.escape(options[:start_at].to_s)}" if options[:start_at]
         url << "&maxResults=#{CGI.escape(options[:max_results].to_s)}" if options[:max_results]
 
@@ -69,6 +70,8 @@ module JIRA
       def method_missing(method_name, *args, &block)
         if attrs.keys.include?('fields') && attrs['fields'].keys.include?(method_name.to_s)
           attrs['fields'][method_name.to_s]
+        elsif attrs.keys.include?('changelog') && method_name.to_s == 'changelog'
+          attrs['changelog']
         else
           super(method_name)
         end
